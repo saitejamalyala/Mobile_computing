@@ -25,7 +25,7 @@ public class MySensorService extends Service implements SensorEventListener {
     private boolean lightSensorListenerRegistered,pressureSensorListenerRegistered,
                                         proximitySensorListenerRegistered,sensorValueChanged=false;
 
-    public float[] val_lightsensor,val_proximitysensor,val_pressuresensor;
+    public float val_lightsensor=0.0f,val_proximitysensor=0.0f,val_pressuresensor=0.0f;
 
     private Thread backgroundService_Thread;
 
@@ -59,22 +59,21 @@ public class MySensorService extends Service implements SensorEventListener {
     public void onSensorChanged(SensorEvent sensorEvent) {
         int sensorType = sensorEvent.sensor.getType();
         float currentValue = sensorEvent.values[0];
+        sensorValueChanged = true;
 
         switch (sensorType) {
             // Event came from the light sensor.
             case Sensor.TYPE_LIGHT:
                 // Handle light sensor
-                val_lightsensor[0] = currentValue;
+                val_lightsensor = sensorEvent.values[0];
                 break;
             case Sensor.TYPE_PROXIMITY:
-                val_proximitysensor[0]=currentValue;
-                /*
-                Handle proximity sensor
-                mTextproximity.setText(getResources().getString(
+                val_proximitysensor=sensorEvent.values[0];
 
-                R.string.label_proximity, currentValue)); */
+                //Handle proximity sensor
+
             case Sensor.TYPE_PRESSURE:
-                val_pressuresensor[0]=currentValue;
+                val_pressuresensor=sensorEvent.values[0];
             default:
 
         }
@@ -86,10 +85,10 @@ public class MySensorService extends Service implements SensorEventListener {
             Bundle bundle = msg.getData();
             String message = bundle.getString("SensorValue");
             MainActivity.mTextsensorLight.setText(getResources().getString(
-                    R.string.label_light,val_lightsensor[0]));
-            MainActivity.mTextSensorProximity.setText(getResources().getString(R.string.label_proximity,val_proximitysensor[0]));
+                    R.string.label_light,val_lightsensor));
+            MainActivity.mTextSensorProximity.setText(getResources().getString(R.string.label_proximity,val_proximitysensor));
 
-            MainActivity.mTextSensorPressure.setText(getResources().getString(R.string.pressure_sensor_hpa_1_2f,val_pressuresensor[0]));
+            MainActivity.mTextSensorPressure.setText(getResources().getString(R.string.pressure_sensor_hpa_1_2f,val_pressuresensor));
 
         }
     };
@@ -104,6 +103,7 @@ public class MySensorService extends Service implements SensorEventListener {
         Sensor_initialize ();
         // Register all available sensor listeners
         RegisterSensorListeners();
+
         startBackgroundThread(intent, startId);
         return START_STICKY;
     }
@@ -169,9 +169,10 @@ public class MySensorService extends Service implements SensorEventListener {
             public void run() {
                 /*thread will run until Runtime exits,
                 it completes its job, or throws an exception*/
-                //if (sensorValueChanged) {
+               if (sensorValueChanged) {
                     //  new sensor changed
-                    //sensorValueChanged = false;
+                    sensorValueChanged = false;
+                    Log.i(TAG, "Callinng obtain message");
                     Message msg = handler.obtainMessage();
                     Bundle bundle = new Bundle();
                     bundle.putString("SensorValue", "Sensor updated: " + startId);
@@ -179,8 +180,10 @@ public class MySensorService extends Service implements SensorEventListener {
                     msg.setData(bundle);
                     Log.i(TAG, "Sending message to handler...");
                     handler.sendMessage(msg);
+
                 }
-            //}
+
+            }
         });
 
         backgroundService_Thread.setPriority(
