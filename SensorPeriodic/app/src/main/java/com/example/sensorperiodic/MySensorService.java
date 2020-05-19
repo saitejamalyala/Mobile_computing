@@ -169,7 +169,11 @@ public class MySensorService extends Service implements SensorEventListener {
             public void run() {
                 /*thread will run until Runtime exits,
                 it completes its job, or throws an exception*/
+<<<<<<< HEAD
                if (sensorValueChanged) {
+=======
+                if (sensorValueChanged) {
+>>>>>>> 703722961839b48f696952cbfa1e1f92ad9ceeba
                     //  new sensor changed
                     sensorValueChanged = false;
                     Log.i(TAG, "Callinng obtain message");
@@ -178,11 +182,14 @@ public class MySensorService extends Service implements SensorEventListener {
                     bundle.putString("SensorValue", "Sensor updated: " + startId);
 
                     msg.setData(bundle);
-                    Log.i(TAG, "Sending message to handler...");
+                    Log.i(TAG, "Sending message to handler");
                     handler.sendMessage(msg);
 
                 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 703722961839b48f696952cbfa1e1f92ad9ceeba
             }
         });
 
